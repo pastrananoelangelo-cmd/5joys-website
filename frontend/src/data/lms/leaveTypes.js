@@ -1,0 +1,8 @@
+export const LEAVE_TYPES = [
+  "VACATION",
+  "SICK",
+  "SOLO PARENT",
+  "MATERNITY/PATERNITY",
+];
+
+export const LEAVE_STATUSES = ["PENDING", "APPROVED", "REJECTED"];
