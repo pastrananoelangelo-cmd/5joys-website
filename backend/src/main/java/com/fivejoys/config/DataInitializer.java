@@ -23,38 +23,38 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        createOrUpdateUser(
+        createUserIfMissing(
                 "1001-0001",
                 "1234"
         );
 
-        createOrUpdateUser(
+        createUserIfMissing(
                 "1001-0002",
                 "1234"
         );
 
-        createOrUpdateUser(
+        createUserIfMissing(
                 "1001-0003",
                 "1234"
         );
 
-        createOrUpdateUser(
+        createUserIfMissing(
                 "1001-0004",
                 "1234"
         );
 
-        createOrUpdateUser(
+        createUserIfMissing(
                 "1001-0005",
                 "1234"
         );
 
-        createOrUpdateUser(
+        createUserIfMissing(
                 "1001-0006",
                 "1234"
         );
     }
 
-    private void createOrUpdateUser(
+    private void createUserIfMissing(
             String employeeNumber,
             String password
     ) {
@@ -65,20 +65,10 @@ public class DataInitializer implements CommandLineRunner {
                         .orElse(null);
 
         if (user == null) {
-
             userService.createUser(
                     employeeNumber,
                     password
             );
-
-            return;
         }
-
-        user.setEnabled(true);
-
-        userService.updateUserPassword(
-                user,
-                password
-        );
     }
 }
