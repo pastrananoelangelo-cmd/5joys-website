@@ -17,7 +17,11 @@ async function request(endpoint, options = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    const data = await response.json();
+
+    throw new Error(
+      data.message || `API request failed: ${response.status}`
+    );
   }
 
   if (response.status === 204) {

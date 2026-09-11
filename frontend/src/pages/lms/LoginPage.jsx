@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLms } from "../../context/LmsContext";
 
 function LoginPage({ setPage }) {
@@ -8,6 +8,34 @@ function LoginPage({ setPage }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [attemptsRemaining, setAttemptsRemaining] = useState(null);
+  const [lockoutSeconds, setLockoutSeconds] = useState(null);
+
+  useEffect(() => {
+    if (
+      lockoutSeconds === null ||
+      lockoutSeconds <= 0
+    ) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+
+      setLockoutSeconds((seconds) => {
+
+        if (seconds <= 1) {
+          clearInterval(timer);
+          return null;
+        }
+
+        return seconds - 1;
+      });
+
+    }, 1000);
+
+    return () => clearInterval(timer);
+
+  }, [lockoutSeconds]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -21,13 +49,25 @@ function LoginPage({ setPage }) {
         password
       );
 
+      setAttemptsRemaining(null);
+      setLockoutSeconds(null);
+
       if (user.role === "HR") {
         setPage("hr-leave-requests");
       } else {
         setPage("dashboard");
       }
     } catch (error) {
-      setError(error.message);
+
+        setError(error.message);
+
+        setAttemptsRemaining(
+            error.attemptsRemaining ?? null
+        );
+
+        setLockoutSeconds(
+            error.retryAfterSeconds ?? null
+        );
     } finally {
       setLoading(false);
     }
@@ -113,24 +153,48 @@ function LoginPage({ setPage }) {
           </div>
 
           {error && (
-            <p
+            <div
               className="text-sm"
               style={{
                 color: "var(--red)"
               }}
             >
-              {error}
-            </p>
+              <p>{error}</p>
+
+              {attemptsRemaining !== null &&
+                attemptsRemaining > 0 && (
+                  <p className="mt-1">
+                    {attemptsRemaining}{" "}
+                    {attemptsRemaining === 1
+                      ? "attempt"
+                      : "attempts"}{" "}
+                    remaining.
+                  </p>
+                )}
+
+              {lockoutSeconds !== null && (
+                <p className="mt-1">
+                  Try again in{" "}
+                  <strong>{lockoutSeconds}</strong>{" "}
+                  seconds.
+                </p>
+              )}
+            </div>
           )}
 
           <button
             type="submit"
             className="fj-btn-primary justify-center text-sm"
-            disabled={loading}
+            disabled={
+              loading ||
+              lockoutSeconds !== null
+            }
           >
             {loading
               ? "Signing in..."
-              : "Sign In"}
+              : lockoutSeconds !== null
+                ? `Try again in ${lockoutSeconds}s`
+                : "Sign In"}
           </button>
 
         </form>

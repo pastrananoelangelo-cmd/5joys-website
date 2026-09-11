@@ -24,9 +24,20 @@ export async function login(employeeNumber, password) {
     );
 
     if (!response.ok) {
-        throw new Error(
-            "Invalid employee ID or password."
-        );
+
+        const data =
+            await response.json();
+
+        const error =
+            new Error(data.message);
+
+        error.attemptsRemaining =
+            data.attemptsRemaining;
+
+        error.retryAfterSeconds =
+            data.retryAfterSeconds;
+
+        throw error;
     }
 
     return response.json();

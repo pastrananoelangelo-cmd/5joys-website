@@ -114,7 +114,7 @@ function DashboardPage() {
             console.error(error);
 
             setPasswordError(
-                "Failed to change password. Please check your current password."
+                error.message
             );
         } finally {
             setChangingPassword(false);
